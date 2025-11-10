@@ -12,13 +12,19 @@ from typing import Any, Dict, Optional
 class AgentResponse:
     """Standardized response container returned by agents."""
 
-    def __init__(self, success: bool, content: str, metadata: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, success: bool, content: str, metadata: Optional[Dict[str, Any]] = None
+    ):
         self.success = success
         self.content = content
         self.metadata = metadata or {}
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"success": self.success, "content": self.content, "metadata": self.metadata}
+        return {
+            "success": self.success,
+            "content": self.content,
+            "metadata": self.metadata,
+        }
 
 
 class AgentBase(ABC):
