@@ -12,7 +12,9 @@ from agents.base import AgentBase, AgentResponse
 
 
 class Orchestrator:
-    def __init__(self, agents: List[AgentBase], config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, agents: List[AgentBase], config: Optional[Dict[str, Any]] = None
+    ):
         self.agents = agents
         self.config = config or {}
 
@@ -23,15 +25,21 @@ class Orchestrator:
             try:
                 await agent.prepare()
                 resp: AgentResponse = await agent.ask(prompt)
-                results["agents"].append({"agent": agent.short_name, "response": resp.to_dict()})
+                results["agents"].append(
+                    {"agent": agent.short_name, "response": resp.to_dict()}
+                )
             except Exception as e:
-                results["agents"].append({"agent": getattr(agent, "short_name", "unknown"), "error": str(e)})
+                results["agents"].append(
+                    {"agent": getattr(agent, "short_name", "unknown"), "error": str(e)}
+                )
             finally:
                 await agent.teardown()
         results["end"] = time.time()
         return results
 
-    async def run_many(self, prompts: List[str], concurrency: int = 2) -> List[Dict[str, Any]]:
+    async def run_many(
+        self, prompts: List[str], concurrency: int = 2
+    ) -> List[Dict[str, Any]]:
         """Run multiple prompts with a concurrency limit."""
         sem = asyncio.Semaphore(concurrency)
 

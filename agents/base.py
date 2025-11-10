@@ -4,7 +4,51 @@ Base AI Agent interface
 
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
-from models.agent_response import AgentResponse
+from models.agent_response import AgentResponse as ModelAgentResponse
+
+
+class AgentResponse:
+    """Standardized response container returned by agents (simple version)."""
+
+    def __init__(
+        self, success: bool, content: str, metadata: Optional[Dict[str, Any]] = None
+    ):
+        self.success = success
+        self.content = content
+        self.metadata = metadata or {}
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "success": self.success,
+            "content": self.content,
+            "metadata": self.metadata,
+        }
+
+
+class AgentBase(ABC):
+    """Abstract base class for AI agents (simple skeleton version)."""
+
+    name: str = "base-agent"
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+
+    async def prepare(self) -> None:
+        """Optional async setup (e.g., warmup, model selection)."""
+        return None
+
+    @abstractmethod
+    async def ask(self, prompt: str, **kwargs) -> AgentResponse:
+        """Send a prompt to the agent and return a standardized AgentResponse."""
+        raise NotImplementedError
+
+    async def teardown(self) -> None:
+        """Optional cleanup."""
+        return None
+
+    @property
+    def short_name(self) -> str:
+        return self.name
 
 
 class AIAgent(ABC):
@@ -25,7 +69,7 @@ class AIAgent(ABC):
     @abstractmethod
     async def query(
         self, question: str, context: Optional[Dict] = None
-    ) -> AgentResponse:
+    ) -> ModelAgentResponse:
         """
         질문에 대한 응답 생성
 
