@@ -177,6 +177,63 @@ black .
 ruff check .
 ```
 
+## 🔧 유틸리티 스크립트
+
+### AI 응답 집계 도구
+
+여러 AI 에이전트의 응답을 분석하고 합의를 도출하는 스크립트:
+
+```bash
+# JSONL 파일에서 AI 응답 로드 및 합의 도출
+python scripts/aggregate_fallback.py data/ai_responses.jsonl out/consensus_fallback.jsonl
+```
+
+**기능:**
+- 질문별로 응답 그룹화
+- 성공한 응답만 필터링
+- 가장 상세한 응답 선택
+- 통계 정보 생성 (성공률, 에이전트 분포, 평균 길이)
+
+**입력 형식 (JSONL):**
+```json
+{"question_id": "q1", "question": "What is AI?", "agent_name": "gemini", "success": true, "content": "..."}
+{"question_id": "q1", "question": "What is AI?", "agent_name": "chatgpt", "success": true, "content": "..."}
+```
+
+**출력 형식 (JSONL):**
+```json
+{
+  "question_id": "q1",
+  "question": "What is AI?",
+  "consensus": {
+    "success": true,
+    "content": "...",
+    "selected_agent": "chatgpt",
+    "total_responses": 3,
+    "successful_responses": 3,
+    "failed_responses": 0
+  }
+}
+```
+
+### 시크릿 관리 도구
+
+API 키를 안전하게 관리하는 스크립트들:
+
+```bash
+# .env 파일 생성
+bash scripts/save_local_env.sh
+
+# OS 키링에 저장
+pip install keyring
+python scripts/save_keyring.py
+
+# GitHub Secrets에 등록
+bash scripts/push_github_secrets.sh
+```
+
+자세한 내용은 [시크릿 관리 가이드](docs/SECRETS_MANAGEMENT.md)를 참고하세요.
+
 ## 📚 문서
 
 - [설계 문서](docs/plans/2025-11-09-ai-orchestrator-design.md)

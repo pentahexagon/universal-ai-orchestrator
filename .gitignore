@@ -25,3 +25,7 @@ build/
 
 # Logs
 logs/
+
+# Data and output directories
+data/
+out/
