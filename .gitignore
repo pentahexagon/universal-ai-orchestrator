@@ -1,52 +1,19 @@
-# Python
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# Virtual Environment
-venv/
+# Virtual environments
 .venv/
-ENV/
+venv/
 env/
 
-# IDE
+# Editor / OS files
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# Environment Variables
-.env
-
-# Logs
-logs/*.log
-
-# OS
 .DS_Store
-Thumbs.db
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Notion Cache (if any)
-.notion_cache/
+# Distribution / build
+dist/
+build/
+*.egg-info/
