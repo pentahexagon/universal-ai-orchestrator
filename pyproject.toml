@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "universal-ai-orchestrator"
+version = "0.1.0"
+description = "Multi-AI consensus system integrating Gemini, ChatGPT, and Claude with Notion automation"
+authors = [
+  { name = "pentahexagon" }
+]
+requires-python = ">=3.11"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
