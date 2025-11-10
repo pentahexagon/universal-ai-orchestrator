@@ -1,58 +1,47 @@
-"""
-Base AI Agent interface
+"""Agent base interface for Universal AI Orchestrator.
+
+Each agent (Gemini, ChatGPT, Claude) should implement AgentBase.
+Supports async usage patterns and lifecycle hooks.
 """
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Optional, Dict, Any
-from datetime import datetime
-from models.agent_response import AgentResponse
+from typing import Any, Dict, Optional
 
 
-class AIAgent(ABC):
-    """
-    모든 AI 에이전트가 구현해야 하는 추상 인터페이스
-    """
+class AgentResponse:
+    """Standardized response container returned by agents."""
 
-    def __init__(self, api_key: str, config: Dict[str, Any]):
-        """
-        Args:
-            api_key: API 키
-            config: 에이전트별 설정
-        """
-        self.api_key = api_key
-        self.config = config
-        self.name = self.__class__.__name__.replace('Agent', '').lower()
+    def __init__(self, success: bool, content: str, metadata: Optional[Dict[str, Any]] = None):
+        self.success = success
+        self.content = content
+        self.metadata = metadata or {}
 
-    @abstractmethod
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgentResponse:
-        """
-        질문에 대한 응답 생성
+    def to_dict(self) -> Dict[str, Any]:
+        return {"success": self.success, "content": self.content, "metadata": self.metadata}
 
-        Args:
-            question: 사용자 질문
-            context: 추가 컨텍스트 (카테고리, 다른 에이전트 결과 등)
 
-        Returns:
-            AgentResponse 객체
-        """
-        pass
+class AgentBase(ABC):
+    """Abstract base class for AI agents."""
+
+    name: str = "base-agent"
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+
+    async def prepare(self) -> None:
+        """Optional async setup (e.g., warmup, model selection)."""
+        return None
 
     @abstractmethod
-    async def health_check(self) -> bool:
-        """
-        API 연결 상태 확인
+    async def ask(self, prompt: str, **kwargs) -> AgentResponse:
+        """Send a prompt to the agent and return a standardized AgentResponse."""
+        raise NotImplementedError
 
-        Returns:
-            연결 성공 여부
-        """
-        pass
+    async def teardown(self) -> None:
+        """Optional cleanup."""
+        return None
 
-    def get_role(self) -> str:
-        """에이전트의 역할 반환"""
-        role_map = {
-            'gemini': '정보 수집',
-            'chatgpt': '분석 및 전략',
-            'claude': '실행 계획'
-        }
-        return role_map.get(self.name, '미정의')
+    @property
+    def short_name(self) -> str:
+        return self.name
