@@ -3,9 +3,7 @@ Base AI Agent interface
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Optional, Dict, Any
-from datetime import datetime
 from models.agent_response import AgentResponse
 
 
@@ -22,10 +20,12 @@ class AIAgent(ABC):
         """
         self.api_key = api_key
         self.config = config
-        self.name = self.__class__.__name__.replace('Agent', '').lower()
+        self.name = self.__class__.__name__.replace("Agent", "").lower()
 
     @abstractmethod
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def query(
+        self, question: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """
         질문에 대한 응답 생성
 
@@ -49,10 +49,10 @@ class AIAgent(ABC):
         pass
 
     def get_role(self) -> str:
-        """에이전트의 역할 반환"""
-        role_map = {
-            'gemini': '정보 수집',
-            'chatgpt': '분석 및 전략',
-            'claude': '실행 계획'
-        }
-        return role_map.get(self.name, '미정의')
+        """
+        에이전트 역할 설명 반환
+
+        Returns:
+            역할 문자열
+        """
+        return self.config.get("role", "AI 에이전트")

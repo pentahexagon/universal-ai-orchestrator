@@ -25,9 +25,9 @@ class Application:
 
         # Notion 클라이언트
         self.notion = NotionClient(
-            api_key=self.config['api_keys']['notion'],
-            inbox_db_id=self.config['notion_db_ids']['inbox'],
-            results_db_id=self.config['notion_db_ids']['results']
+            api_key=self.config["api_keys"]["notion"],
+            inbox_db_id=self.config["notion_db_ids"]["inbox"],
+            results_db_id=self.config["notion_db_ids"]["results"],
         )
 
         # Orchestrator
@@ -36,8 +36,8 @@ class Application:
         # Watcher
         self.watcher = NotionWatcher(
             notion_client=self.notion,
-            polling_interval=self.config.get('system.polling_interval', 30),
-            max_concurrent_tasks=self.config.get('system.max_concurrent_tasks', 5)
+            polling_interval=self.config.get("system.polling_interval", 30),
+            max_concurrent_tasks=self.config.get("system.max_concurrent_tasks", 5),
         )
 
     async def start(self):
@@ -55,10 +55,7 @@ class Application:
         # Graceful shutdown 핸들러
         loop = asyncio.get_event_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
-            loop.add_signal_handler(
-                sig,
-                lambda: asyncio.create_task(self.shutdown())
-            )
+            loop.add_signal_handler(sig, lambda: asyncio.create_task(self.shutdown()))
 
         # Watcher 시작
         try:
@@ -75,33 +72,32 @@ class Application:
             result = await self.orchestrator.process_question(
                 question=question.text,
                 context={
-                    'category': question.category,
-                    'priority': question.priority.value
-                }
+                    "category": question.category,
+                    "priority": question.priority.value,
+                },
             )
 
-            if result['success']:
+            if result["success"]:
                 # 결과 페이지 생성
                 result_page = await self.notion.create_result_page(
                     question=question,
-                    responses=result['responses'],
-                    synthesis=result['synthesis'],
-                    metadata=result['metadata']
+                    responses=result["responses"],
+                    synthesis=result["synthesis"],
+                    metadata=result["metadata"],
                 )
 
                 # Inbox 상태 업데이트
                 await self.notion.update_question_status(
                     page_id=question.page_id,
                     status=QuestionStatus.COMPLETED,
-                    result_url=result_page['url']
+                    result_url=result_page["url"],
                 )
 
                 logger.info(f"✅ 완료: {result_page['url']}")
             else:
                 # 실패 처리
                 await self.notion.update_question_status(
-                    page_id=question.page_id,
-                    status=QuestionStatus.FAILED
+                    page_id=question.page_id, status=QuestionStatus.FAILED
                 )
 
         except Exception as e:
@@ -114,7 +110,7 @@ class Application:
 
         # Notion
         notion_ok = await self.notion.health_check()
-        checks.append(('Notion', notion_ok))
+        checks.append(("Notion", notion_ok))
 
         # AI Agents
         agent_status = await self.orchestrator.health_check_all()

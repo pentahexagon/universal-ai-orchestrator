@@ -14,10 +14,7 @@ class RateLimiter:
     """
 
     def __init__(
-        self,
-        max_requests: int,
-        time_window: float,
-        name: Optional[str] = None
+        self, max_requests: int, time_window: float, name: Optional[str] = None
     ):
         """
         Args:
@@ -60,8 +57,8 @@ class RateLimiter:
 
 # 전역 레이트 리미터 인스턴스
 rate_limiters = {
-    'gemini': RateLimiter(max_requests=60, time_window=60, name='Gemini'),
-    'openai': RateLimiter(max_requests=50, time_window=60, name='OpenAI'),
-    'anthropic': RateLimiter(max_requests=50, time_window=60, name='Anthropic'),
-    'notion': RateLimiter(max_requests=3, time_window=1, name='Notion')
+    "gemini": RateLimiter(max_requests=60, time_window=60, name="Gemini"),
+    "openai": RateLimiter(max_requests=50, time_window=60, name="OpenAI"),
+    "anthropic": RateLimiter(max_requests=50, time_window=60, name="Anthropic"),
+    "notion": RateLimiter(max_requests=3, time_window=1, name="Notion"),
 }

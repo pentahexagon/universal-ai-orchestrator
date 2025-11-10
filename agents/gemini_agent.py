@@ -20,9 +20,11 @@ class GeminiAgent(AIAgent):
     def __init__(self, api_key: str, config: Dict):
         super().__init__(api_key, config)
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(config.get('model', 'gemini-pro'))
+        self.model = genai.GenerativeModel(config.get("model", "gemini-pro"))
 
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def query(
+        self, question: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """
         정보 수집 수행
         """
@@ -40,11 +42,11 @@ class GeminiAgent(AIAgent):
                 agent_name=self.name,
                 content=response.text,
                 metadata={
-                    'tokens': len(response.text.split()),
-                    'duration': (datetime.now() - start_time).total_seconds()
+                    "tokens": len(response.text.split()),
+                    "duration": (datetime.now() - start_time).total_seconds(),
                 },
                 timestamp=datetime.now(),
-                success=True
+                success=True,
             )
 
         except Exception as e:
@@ -55,12 +57,12 @@ class GeminiAgent(AIAgent):
                 metadata={},
                 timestamp=datetime.now(),
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
     def _build_prompt(self, question: str, context: Optional[Dict]) -> str:
         """프롬프트 생성"""
-        category = context.get('category', '일반') if context else '일반'
+        category = context.get("category", "일반") if context else "일반"
 
         base_prompt = f"""
 당신은 {category} 분야의 정보 수집 전문가입니다.
@@ -84,5 +86,5 @@ class GeminiAgent(AIAgent):
         try:
             test_response = self.model.generate_content("Hello")
             return bool(test_response.text)
-        except:
+        except Exception:
             return False

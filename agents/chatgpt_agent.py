@@ -20,10 +20,12 @@ class ChatGPTAgent(AIAgent):
     def __init__(self, api_key: str, config: Dict):
         super().__init__(api_key, config)
         self.client = AsyncOpenAI(api_key=api_key)
-        self.model = config.get('model', 'gpt-4')
-        self.temperature = config.get('temperature', 0.7)
+        self.model = config.get("model", "gpt-4")
+        self.temperature = config.get("temperature", 0.7)
 
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def query(
+        self, question: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """
         분석 및 전략 수립
         """
@@ -31,7 +33,7 @@ class ChatGPTAgent(AIAgent):
 
         try:
             # 이전 에이전트 결과 (Gemini)가 있으면 활용
-            gemini_result = context.get('gemini_result', '') if context else ''
+            gemini_result = context.get("gemini_result", "") if context else ""
 
             prompt = self._build_prompt(question, gemini_result, context)
 
@@ -39,9 +41,9 @@ class ChatGPTAgent(AIAgent):
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "당신은 전략 분석 전문가입니다."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
-                temperature=self.temperature
+                temperature=self.temperature,
             )
 
             content = response.choices[0].message.content
@@ -50,12 +52,12 @@ class ChatGPTAgent(AIAgent):
                 agent_name=self.name,
                 content=content,
                 metadata={
-                    'tokens': response.usage.total_tokens,
-                    'duration': (datetime.now() - start_time).total_seconds(),
-                    'model': self.model
+                    "tokens": response.usage.total_tokens,
+                    "duration": (datetime.now() - start_time).total_seconds(),
+                    "model": self.model,
                 },
                 timestamp=datetime.now(),
-                success=True
+                success=True,
             )
 
         except Exception as e:
@@ -66,12 +68,14 @@ class ChatGPTAgent(AIAgent):
                 metadata={},
                 timestamp=datetime.now(),
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
-    def _build_prompt(self, question: str, research: str, context: Optional[Dict]) -> str:
+    def _build_prompt(
+        self, question: str, research: str, context: Optional[Dict]
+    ) -> str:
         """프롬프트 생성"""
-        category = context.get('category', '일반') if context else '일반'
+        category = context.get("category", "일반") if context else "일반"
 
         prompt = f"""
 당신은 {category} 분야의 전략 분석가입니다.
@@ -98,8 +102,8 @@ class ChatGPTAgent(AIAgent):
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": "test"}],
-                max_tokens=5
+                max_tokens=5,
             )
             return bool(response.choices)
-        except:
+        except Exception:
             return False

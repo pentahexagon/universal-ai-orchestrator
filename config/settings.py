@@ -33,7 +33,7 @@ class ConfigManager:
             logger.warning(f"설정 파일 없음: {self.config_path}, 기본값 사용")
             return self._get_default_config()
 
-        with open(self.config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def _load_env_vars(self):
@@ -41,27 +41,27 @@ class ConfigManager:
         load_dotenv()
 
         # API 키는 환경변수에서만 로드 (보안)
-        self.config['api_keys'] = {
-            'anthropic': os.getenv('ANTHROPIC_API_KEY'),
-            'openai': os.getenv('OPENAI_API_KEY'),
-            'gemini': os.getenv('GEMINI_API_KEY'),
-            'notion': os.getenv('NOTION_API_KEY')
+        self.config["api_keys"] = {
+            "anthropic": os.getenv("ANTHROPIC_API_KEY"),
+            "openai": os.getenv("OPENAI_API_KEY"),
+            "gemini": os.getenv("GEMINI_API_KEY"),
+            "notion": os.getenv("NOTION_API_KEY"),
         }
 
-        self.config['notion_db_ids'] = {
-            'inbox': os.getenv('NOTION_INBOX_DB_ID'),
-            'results': os.getenv('NOTION_RESULTS_DB_ID')
+        self.config["notion_db_ids"] = {
+            "inbox": os.getenv("NOTION_INBOX_DB_ID"),
+            "results": os.getenv("NOTION_RESULTS_DB_ID"),
         }
 
     def _validate_config(self):
         """설정 검증"""
         required_keys = [
-            'api_keys.anthropic',
-            'api_keys.openai',
-            'api_keys.gemini',
-            'api_keys.notion',
-            'notion_db_ids.inbox',
-            'notion_db_ids.results'
+            "api_keys.anthropic",
+            "api_keys.openai",
+            "api_keys.gemini",
+            "api_keys.notion",
+            "notion_db_ids.inbox",
+            "notion_db_ids.results",
         ]
 
         missing = []
@@ -79,7 +79,7 @@ class ConfigManager:
 
     def _get_nested(self, d: dict, path: str):
         """중첩된 딕셔너리 값 가져오기"""
-        keys = path.split('.')
+        keys = path.split(".")
         for key in keys:
             d = d.get(key, {})
             if not d:
@@ -89,35 +89,31 @@ class ConfigManager:
     def _get_default_config(self) -> Dict[str, Any]:
         """기본 설정"""
         return {
-            'system': {
-                'polling_interval': 30,
-                'max_concurrent_tasks': 5,
-                'log_level': 'INFO'
+            "system": {
+                "polling_interval": 30,
+                "max_concurrent_tasks": 5,
+                "log_level": "INFO",
             },
-            'agents': {
-                'gemini': {
-                    'model': 'gemini-pro',
-                    'timeout': 120,
-                    'max_retries': 3
+            "agents": {
+                "gemini": {"model": "gemini-pro", "timeout": 120, "max_retries": 3},
+                "chatgpt": {
+                    "model": "gpt-4",
+                    "timeout": 120,
+                    "max_retries": 3,
+                    "temperature": 0.7,
                 },
-                'chatgpt': {
-                    'model': 'gpt-4',
-                    'timeout': 120,
-                    'max_retries': 3,
-                    'temperature': 0.7
+                "claude": {
+                    "model": "claude-sonnet-4-5-20250929",
+                    "timeout": 120,
+                    "max_retries": 3,
                 },
-                'claude': {
-                    'model': 'claude-sonnet-4-5-20250929',
-                    'timeout': 120,
-                    'max_retries': 3
-                }
             },
-            'rate_limits': {
-                'gemini': {'max_requests': 60, 'time_window': 60},
-                'openai': {'max_requests': 50, 'time_window': 60},
-                'anthropic': {'max_requests': 50, 'time_window': 60},
-                'notion': {'max_requests': 3, 'time_window': 1}
-            }
+            "rate_limits": {
+                "gemini": {"max_requests": 60, "time_window": 60},
+                "openai": {"max_requests": 50, "time_window": 60},
+                "anthropic": {"max_requests": 50, "time_window": 60},
+                "notion": {"max_requests": 3, "time_window": 1},
+            },
         }
 
     def get(self, key: str, default=None):

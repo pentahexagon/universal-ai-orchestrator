@@ -20,6 +20,7 @@ class AgentResponse:
         metadata: 메타데이터 (토큰 수, 소요 시간 등)
         error: 에러 메시지 (실패시)
     """
+
     agent_name: str
     content: str
     timestamp: datetime
@@ -30,12 +31,12 @@ class AgentResponse:
     def to_dict(self) -> dict:
         """딕셔너리로 변환"""
         return {
-            'agent_name': self.agent_name,
-            'content': self.content,
-            'timestamp': self.timestamp.isoformat(),
-            'success': self.success,
-            'metadata': self.metadata,
-            'error': self.error
+            "agent_name": self.agent_name,
+            "content": self.content,
+            "timestamp": self.timestamp.isoformat(),
+            "success": self.success,
+            "metadata": self.metadata,
+            "error": self.error,
         }
 
     def __str__(self) -> str:

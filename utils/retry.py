@@ -14,7 +14,7 @@ def async_retry(
     max_attempts: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: Tuple[Type[Exception], ...] = (Exception,)
+    exceptions: Tuple[Type[Exception], ...] = (Exception,),
 ):
     """
     비동기 함수용 재시도 데코레이터
@@ -30,6 +30,7 @@ def async_retry(
         async def fetch_data():
             ...
     """
+
     def decorator(func: Callable):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -45,8 +46,7 @@ def async_retry(
 
                     if attempt == max_attempts:
                         logger.error(
-                            f"❌ {func.__name__} 실패 "
-                            f"({max_attempts}회 시도): {e}"
+                            f"❌ {func.__name__} 실패 " f"({max_attempts}회 시도): {e}"
                         )
                         raise
 
@@ -61,4 +61,5 @@ def async_retry(
             raise last_exception
 
         return wrapper
+
     return decorator
