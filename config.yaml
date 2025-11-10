@@ -1,0 +1,58 @@
+# Universal AI Orchestrator Configuration
+
+system:
+  polling_interval: 30  # Notion 폴링 간격 (초)
+  max_concurrent_tasks: 5  # 동시 처리 최대 질문 수
+  log_level: INFO  # DEBUG | INFO | WARNING | ERROR
+  environment: production  # development | production
+
+agents:
+  gemini:
+    model: gemini-pro
+    timeout: 120
+    max_retries: 3
+    role: "정보 수집 전문가"
+    description: "웹 리서치 및 데이터 수집"
+
+  chatgpt:
+    model: gpt-4
+    timeout: 120
+    max_retries: 3
+    temperature: 0.7
+    role: "전략 분석가"
+    description: "인사이트 도출 및 전략 수립"
+
+  claude:
+    model: claude-sonnet-4-5-20250929
+    timeout: 120
+    max_retries: 3
+    role: "실행 계획 전문가"
+    description: "실행 로드맵 및 리스크 분석"
+
+rate_limits:
+  gemini:
+    max_requests: 60
+    time_window: 60  # 초
+  openai:
+    max_requests: 50
+    time_window: 60
+  anthropic:
+    max_requests: 50
+    time_window: 60
+  notion:
+    max_requests: 3
+    time_window: 1
+
+circuit_breakers:
+  failure_threshold: 5  # 연속 실패 임계값
+  recovery_timeout: 60  # 복구 시도 대기 시간 (초)
+
+notion:
+  page_size: 100  # 한 번에 가져올 페이지 수
+  update_batch_size: 10
+
+logging:
+  file: logs/orchestrator.log
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+  format: "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
