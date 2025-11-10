@@ -3,7 +3,6 @@ Notion Watcher Service
 """
 
 import asyncio
-from datetime import datetime
 from typing import Set, Callable, Awaitable
 from integrations.notion_client import NotionClient
 from models.question import Question, QuestionStatus
@@ -120,7 +119,7 @@ class NotionWatcher:
                 await self.notion.update_question_status(
                     page_id=page_id, status=QuestionStatus.FAILED
                 )
-            except:
+            except Exception:
                 pass
 
         finally:

@@ -117,5 +117,5 @@ class ClaudeAgent(AIAgent):
                 messages=[{"role": "user", "content": "test"}],
             )
             return bool(message.content)
-        except:
+        except Exception:
             return False

@@ -105,5 +105,5 @@ class ChatGPTAgent(AIAgent):
                 max_tokens=5,
             )
             return bool(response.choices)
-        except:
+        except Exception:
             return False

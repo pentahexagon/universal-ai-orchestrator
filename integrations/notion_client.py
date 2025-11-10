@@ -2,8 +2,6 @@
 Notion API Client
 """
 
-import asyncio
-from datetime import datetime
 from typing import List, Optional, Dict, Any
 from notion_client import AsyncClient
 from notion_client.errors import APIResponseError
@@ -317,5 +315,5 @@ class NotionClient:
         try:
             await self.client.users.me()
             return True
-        except:
+        except Exception:
             return False

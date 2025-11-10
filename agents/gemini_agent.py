@@ -86,5 +86,5 @@ class GeminiAgent(AIAgent):
         try:
             test_response = self.model.generate_content("Hello")
             return bool(test_response.text)
-        except:
+        except Exception:
             return False
