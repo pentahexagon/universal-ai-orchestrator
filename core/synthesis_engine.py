@@ -19,8 +19,7 @@ class SynthesisEngine:
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = "claude-sonnet-4-5-20250929"
 
-    async def synthesize(self, question: str,
-                        responses: List[AgentResponse]) -> str:
+    async def synthesize(self, question: str, responses: List[AgentResponse]) -> str:
         """
         3개 응답을 통합
 
@@ -33,9 +32,9 @@ class SynthesisEngine:
         """
 
         # 응답 정리
-        gemini = next((r for r in responses if r.agent_name == 'gemini'), None)
-        chatgpt = next((r for r in responses if r.agent_name == 'chatgpt'), None)
-        claude = next((r for r in responses if r.agent_name == 'claude'), None)
+        gemini = next((r for r in responses if r.agent_name == "gemini"), None)
+        chatgpt = next((r for r in responses if r.agent_name == "chatgpt"), None)
+        claude = next((r for r in responses if r.agent_name == "claude"), None)
 
         if not all([gemini, chatgpt, claude]):
             logger.warning("일부 에이전트 응답 누락")
@@ -44,14 +43,14 @@ class SynthesisEngine:
             question,
             gemini.content if gemini and gemini.success else "정보 없음",
             chatgpt.content if chatgpt and chatgpt.success else "분석 없음",
-            claude.content if claude and claude.success else "계획 없음"
+            claude.content if claude and claude.success else "계획 없음",
         )
 
         try:
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=5000,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             return message.content[0].text
@@ -60,10 +59,13 @@ class SynthesisEngine:
             logger.error(f"통합 엔진 오류: {e}", exc_info=True)
             raise
 
-    def _build_synthesis_prompt(self, question: str,
-                                gemini_content: str,
-                                chatgpt_content: str,
-                                claude_content: str) -> str:
+    def _build_synthesis_prompt(
+        self,
+        question: str,
+        gemini_content: str,
+        chatgpt_content: str,
+        claude_content: str,
+    ) -> str:
         """통합 프롬프트 생성"""
 
         prompt = f"""

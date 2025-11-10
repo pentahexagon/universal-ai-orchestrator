@@ -20,9 +20,11 @@ class ClaudeAgent(AIAgent):
     def __init__(self, api_key: str, config: Dict):
         super().__init__(api_key, config)
         self.client = anthropic.Anthropic(api_key=api_key)
-        self.model = config.get('model', 'claude-sonnet-4-5-20250929')
+        self.model = config.get("model", "claude-sonnet-4-5-20250929")
 
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def query(
+        self, question: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """
         실행 계획 수립 및 검증
         """
@@ -30,15 +32,17 @@ class ClaudeAgent(AIAgent):
 
         try:
             # 이전 두 에이전트 결과 활용
-            gemini_result = context.get('gemini_result', '') if context else ''
-            chatgpt_result = context.get('chatgpt_result', '') if context else ''
+            gemini_result = context.get("gemini_result", "") if context else ""
+            chatgpt_result = context.get("chatgpt_result", "") if context else ""
 
-            prompt = self._build_prompt(question, gemini_result, chatgpt_result, context)
+            prompt = self._build_prompt(
+                question, gemini_result, chatgpt_result, context
+            )
 
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=4000,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             content = message.content[0].text
@@ -47,12 +51,12 @@ class ClaudeAgent(AIAgent):
                 agent_name=self.name,
                 content=content,
                 metadata={
-                    'tokens': message.usage.input_tokens + message.usage.output_tokens,
-                    'duration': (datetime.now() - start_time).total_seconds(),
-                    'model': self.model
+                    "tokens": message.usage.input_tokens + message.usage.output_tokens,
+                    "duration": (datetime.now() - start_time).total_seconds(),
+                    "model": self.model,
                 },
                 timestamp=datetime.now(),
-                success=True
+                success=True,
             )
 
         except Exception as e:
@@ -63,13 +67,14 @@ class ClaudeAgent(AIAgent):
                 metadata={},
                 timestamp=datetime.now(),
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
-    def _build_prompt(self, question: str, research: str,
-                     analysis: str, context: Optional[Dict]) -> str:
+    def _build_prompt(
+        self, question: str, research: str, analysis: str, context: Optional[Dict]
+    ) -> str:
         """프롬프트 생성"""
-        category = context.get('category', '일반') if context else '일반'
+        category = context.get("category", "일반") if context else "일반"
 
         prompt = f"""
 당신은 {category} 분야의 실행 전문가이자 검증자입니다.
@@ -109,7 +114,7 @@ class ClaudeAgent(AIAgent):
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=10,
-                messages=[{"role": "user", "content": "test"}]
+                messages=[{"role": "user", "content": "test"}],
             )
             return bool(message.content)
         except:

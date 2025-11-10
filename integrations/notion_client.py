@@ -40,31 +40,20 @@ class NotionClient:
         Returns:
             Question 객체 리스트
         """
-        await rate_limiters['notion'].acquire()
+        await rate_limiters["notion"].acquire()
 
         try:
             response = await self.client.databases.query(
                 database_id=self.inbox_db_id,
-                filter={
-                    "property": "상태",
-                    "status": {
-                        "equals": "pending"
-                    }
-                },
+                filter={"property": "상태", "status": {"equals": "pending"}},
                 sorts=[
-                    {
-                        "property": "우선순위",
-                        "direction": "ascending"
-                    },
-                    {
-                        "timestamp": "created_time",
-                        "direction": "ascending"
-                    }
-                ]
+                    {"property": "우선순위", "direction": "ascending"},
+                    {"timestamp": "created_time", "direction": "ascending"},
+                ],
             )
 
             questions = []
-            for page in response['results']:
+            for page in response["results"]:
                 try:
                     question = Question.from_notion_page(page)
                     questions.append(question)
@@ -80,10 +69,7 @@ class NotionClient:
 
     @async_retry(max_attempts=3, delay=1.0)
     async def update_question_status(
-        self,
-        page_id: str,
-        status: QuestionStatus,
-        result_url: Optional[str] = None
+        self, page_id: str, status: QuestionStatus, result_url: Optional[str] = None
     ):
         """
         Inbox 페이지 상태 업데이트
@@ -93,27 +79,16 @@ class NotionClient:
             status: 새 상태
             result_url: 결과 페이지 URL (optional)
         """
-        await rate_limiters['notion'].acquire()
+        await rate_limiters["notion"].acquire()
 
-        properties = {
-            "상태": {
-                "status": {
-                    "name": status.value
-                }
-            }
-        }
+        properties = {"상태": {"status": {"name": status.value}}}
 
         # 결과 링크 추가
         if result_url:
-            properties["결과링크"] = {
-                "url": result_url
-            }
+            properties["결과링크"] = {"url": result_url}
 
         try:
-            await self.client.pages.update(
-                page_id=page_id,
-                properties=properties
-            )
+            await self.client.pages.update(page_id=page_id, properties=properties)
             logger.info(f"✅ 상태 업데이트: {page_id} → {status.value}")
 
         except APIResponseError as e:
@@ -126,7 +101,7 @@ class NotionClient:
         question: Question,
         responses: Dict[str, Dict],
         synthesis: str,
-        metadata: Dict[str, Any]
+        metadata: Dict[str, Any],
     ) -> Dict[str, str]:
         """
         Results 데이터베이스에 결과 페이지 생성
@@ -140,31 +115,15 @@ class NotionClient:
         Returns:
             {'id': '...', 'url': '...'}
         """
-        await rate_limiters['notion'].acquire()
+        await rate_limiters["notion"].acquire()
 
         try:
             # Properties
             properties = {
-                "제목": {
-                    "title": [
-                        {
-                            "text": {
-                                "content": question.text[:100]
-                            }
-                        }
-                    ]
-                },
-                "카테고리": {
-                    "select": {
-                        "name": question.category or "기타"
-                    }
-                },
-                "처리시간": {
-                    "number": metadata.get('total_duration', 0)
-                },
-                "성공 에이전트": {
-                    "number": metadata.get('successful_agents', 0)
-                }
+                "제목": {"title": [{"text": {"content": question.text[:100]}}]},
+                "카테고리": {"select": {"name": question.category or "기타"}},
+                "처리시간": {"number": metadata.get("total_duration", 0)},
+                "성공 에이전트": {"number": metadata.get("successful_agents", 0)},
             }
 
             # Page content (blocks)
@@ -176,13 +135,10 @@ class NotionClient:
             page = await self.client.pages.create(
                 parent={"database_id": self.results_db_id},
                 properties=properties,
-                children=children
+                children=children,
             )
 
-            result = {
-                'id': page['id'],
-                'url': page['url']
-            }
+            result = {"id": page["id"], "url": page["url"]}
 
             logger.info(f"✅ 결과 페이지 생성: {result['url']}")
             return result
@@ -196,145 +152,163 @@ class NotionClient:
         question: Question,
         responses: Dict[str, Dict],
         synthesis: str,
-        metadata: Dict[str, Any]
+        metadata: Dict[str, Any],
     ) -> List[Dict]:
         """Notion 페이지 블록 생성"""
         blocks = []
 
         # 1. 원본 질문
-        blocks.extend([
-            {
-                "object": "block",
-                "type": "heading_1",
-                "heading_1": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": "📝 원본 질문"}}
-                    ]
-                }
-            },
-            {
-                "object": "block",
-                "type": "quote",
-                "quote": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": question.text}}
-                    ],
-                    "color": "blue_background"
-                }
-            },
-            {
-                "object": "block",
-                "type": "divider",
-                "divider": {}
-            }
-        ])
+        blocks.extend(
+            [
+                {
+                    "object": "block",
+                    "type": "heading_1",
+                    "heading_1": {
+                        "rich_text": [
+                            {"type": "text", "text": {"content": "📝 원본 질문"}}
+                        ]
+                    },
+                },
+                {
+                    "object": "block",
+                    "type": "quote",
+                    "quote": {
+                        "rich_text": [
+                            {"type": "text", "text": {"content": question.text}}
+                        ],
+                        "color": "blue_background",
+                    },
+                },
+                {"object": "block", "type": "divider", "divider": {}},
+            ]
+        )
 
         # 2. 통합 분석 (주요 섹션)
-        blocks.extend([
-            {
-                "object": "block",
-                "type": "heading_1",
-                "heading_1": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": "🎯 통합 분석"}}
-                    ]
-                }
-            },
-            {
-                "object": "block",
-                "type": "paragraph",
-                "paragraph": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": synthesis[:2000]}}
-                    ]
-                }
-            }
-        ])
+        blocks.extend(
+            [
+                {
+                    "object": "block",
+                    "type": "heading_1",
+                    "heading_1": {
+                        "rich_text": [
+                            {"type": "text", "text": {"content": "🎯 통합 분석"}}
+                        ]
+                    },
+                },
+                {
+                    "object": "block",
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [
+                            {"type": "text", "text": {"content": synthesis[:2000]}}
+                        ]
+                    },
+                },
+            ]
+        )
 
         # 구분선
-        blocks.append({
-            "object": "block",
-            "type": "divider",
-            "divider": {}
-        })
+        blocks.append({"object": "block", "type": "divider", "divider": {}})
 
         # 3. 개별 AI 응답
-        blocks.append({
-            "object": "block",
-            "type": "heading_2",
-            "heading_2": {
-                "rich_text": [
-                    {"type": "text", "text": {"content": "🤖 개별 AI 응답"}}
-                ]
+        blocks.append(
+            {
+                "object": "block",
+                "type": "heading_2",
+                "heading_2": {
+                    "rich_text": [
+                        {"type": "text", "text": {"content": "🤖 개별 AI 응답"}}
+                    ]
+                },
             }
-        })
+        )
 
-        agent_emojis = {
-            'gemini': '🔍',
-            'chatgpt': '💡',
-            'claude': '✅'
-        }
+        agent_emojis = {"gemini": "🔍", "chatgpt": "💡", "claude": "✅"}
 
         for agent_name, response in responses.items():
-            emoji = agent_emojis.get(agent_name, '🤖')
-            status_emoji = "✅" if response['success'] else "❌"
+            emoji = agent_emojis.get(agent_name, "🤖")
+            status_emoji = "✅" if response["success"] else "❌"
 
-            blocks.append({
-                "object": "block",
-                "type": "toggle",
-                "toggle": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": f"{emoji} {agent_name.upper()} {status_emoji}"}}
-                    ],
-                    "children": [
-                        {
-                            "object": "block",
-                            "type": "paragraph",
-                            "paragraph": {
-                                "rich_text": [
-                                    {"type": "text", "text": {"content": response['content'][:2000] if response['success'] else f"오류: {response.get('error', '알 수 없음')}"}}
-                                ]
+            blocks.append(
+                {
+                    "object": "block",
+                    "type": "toggle",
+                    "toggle": {
+                        "rich_text": [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": f"{emoji} {agent_name.upper()} {status_emoji}"
+                                },
                             }
-                        }
-                    ]
+                        ],
+                        "children": [
+                            {
+                                "object": "block",
+                                "type": "paragraph",
+                                "paragraph": {
+                                    "rich_text": [
+                                        {
+                                            "type": "text",
+                                            "text": {
+                                                "content": (
+                                                    response["content"][:2000]
+                                                    if response["success"]
+                                                    else f"오류: {response.get('error', '알 수 없음')}"
+                                                )
+                                            },
+                                        }
+                                    ]
+                                },
+                            }
+                        ],
+                    },
                 }
-            })
+            )
 
         # 4. 메타데이터
-        blocks.extend([
-            {
-                "object": "block",
-                "type": "divider",
-                "divider": {}
-            },
-            {
-                "object": "block",
-                "type": "heading_3",
-                "heading_3": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": "📊 처리 정보"}}
-                    ]
-                }
-            },
-            {
-                "object": "block",
-                "type": "bulleted_list_item",
-                "bulleted_list_item": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": f"처리 시간: {metadata.get('total_duration', 0):.1f}초"}}
-                    ]
-                }
-            },
-            {
-                "object": "block",
-                "type": "bulleted_list_item",
-                "bulleted_list_item": {
-                    "rich_text": [
-                        {"type": "text", "text": {"content": f"성공 에이전트: {metadata.get('successful_agents', 0)}/{metadata.get('total_agents', 3)}"}}
-                    ]
-                }
-            }
-        ])
+        blocks.extend(
+            [
+                {"object": "block", "type": "divider", "divider": {}},
+                {
+                    "object": "block",
+                    "type": "heading_3",
+                    "heading_3": {
+                        "rich_text": [
+                            {"type": "text", "text": {"content": "📊 처리 정보"}}
+                        ]
+                    },
+                },
+                {
+                    "object": "block",
+                    "type": "bulleted_list_item",
+                    "bulleted_list_item": {
+                        "rich_text": [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": f"처리 시간: {metadata.get('total_duration', 0):.1f}초"
+                                },
+                            }
+                        ]
+                    },
+                },
+                {
+                    "object": "block",
+                    "type": "bulleted_list_item",
+                    "bulleted_list_item": {
+                        "rich_text": [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": f"성공 에이전트: {metadata.get('successful_agents', 0)}/{metadata.get('total_agents', 3)}"
+                                },
+                            }
+                        ]
+                    },
+                },
+            ]
+        )
 
         return blocks
 

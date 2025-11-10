@@ -4,4 +4,4 @@ External service integrations
 
 from .notion_client import NotionClient
 
-__all__ = ['NotionClient']
+__all__ = ["NotionClient"]

@@ -32,26 +32,21 @@ class Orchestrator:
         # AI 에이전트 초기화
         self.agents: List[AIAgent] = [
             GeminiAgent(
-                api_key=config['api_keys']['gemini'],
-                config=config['agents']['gemini']
+                api_key=config["api_keys"]["gemini"], config=config["agents"]["gemini"]
             ),
             ChatGPTAgent(
-                api_key=config['api_keys']['openai'],
-                config=config['agents']['chatgpt']
+                api_key=config["api_keys"]["openai"], config=config["agents"]["chatgpt"]
             ),
             ClaudeAgent(
-                api_key=config['api_keys']['anthropic'],
-                config=config['agents']['claude']
-            )
+                api_key=config["api_keys"]["anthropic"],
+                config=config["agents"]["claude"],
+            ),
         ]
 
         # 통합 엔진
-        self.synthesis = SynthesisEngine(
-            api_key=config['api_keys']['anthropic']
-        )
+        self.synthesis = SynthesisEngine(api_key=config["api_keys"]["anthropic"])
 
-    async def process_question(self, question: str,
-                              context: Dict = None) -> Dict:
+    async def process_question(self, question: str, context: Dict = None) -> Dict:
         """
         질문 처리 메인 파이프라인
 
@@ -98,42 +93,44 @@ class Orchestrator:
             logger.info(f"✅ 처리 완료 ({duration:.1f}초)")
 
             return {
-                'success': True,
-                'question': question,
-                'responses': {
+                "success": True,
+                "question": question,
+                "responses": {
                     r.agent_name: {
-                        'content': r.content,
-                        'success': r.success,
-                        'error': r.error,
-                        'metadata': r.metadata
-                    } for r in responses
+                        "content": r.content,
+                        "success": r.success,
+                        "error": r.error,
+                        "metadata": r.metadata,
+                    }
+                    for r in responses
                 },
-                'synthesis': synthesis,
-                'metadata': {
-                    'total_duration': duration,
-                    'timestamp': datetime.now().isoformat(),
-                    'successful_agents': len(successful),
-                    'total_agents': len(responses),
-                    'errors': errors
-                }
+                "synthesis": synthesis,
+                "metadata": {
+                    "total_duration": duration,
+                    "timestamp": datetime.now().isoformat(),
+                    "successful_agents": len(successful),
+                    "total_agents": len(responses),
+                    "errors": errors,
+                },
             }
 
         except Exception as e:
             logger.error(f"❌ 오케스트레이션 오류: {e}", exc_info=True)
 
             return {
-                'success': False,
-                'question': question,
-                'error': str(e),
-                'errors': errors,
-                'metadata': {
-                    'timestamp': datetime.now().isoformat(),
-                    'duration': (datetime.now() - start_time).total_seconds()
-                }
+                "success": False,
+                "question": question,
+                "error": str(e),
+                "errors": errors,
+                "metadata": {
+                    "timestamp": datetime.now().isoformat(),
+                    "duration": (datetime.now() - start_time).total_seconds(),
+                },
             }
 
-    async def _dispatch_sequential(self, question: str,
-                                   context: Dict) -> List[AgentResponse]:
+    async def _dispatch_sequential(
+        self, question: str, context: Dict
+    ) -> List[AgentResponse]:
         """
         AI 에이전트를 순차적으로 호출 (각 AI가 이전 결과를 받음)
         Gemini → ChatGPT → Claude
@@ -148,7 +145,9 @@ class Orchestrator:
             # 2. ChatGPT (분석) - Gemini 결과 활용
             chatgpt_context = {
                 **context,
-                'gemini_result': gemini_response.content if gemini_response.success else ""
+                "gemini_result": (
+                    gemini_response.content if gemini_response.success else ""
+                ),
             }
             chatgpt_response = await self.agents[1].query(question, chatgpt_context)
             responses.append(chatgpt_response)
@@ -156,8 +155,12 @@ class Orchestrator:
             # 3. Claude (실행) - Gemini + ChatGPT 결과 활용
             claude_context = {
                 **context,
-                'gemini_result': gemini_response.content if gemini_response.success else "",
-                'chatgpt_result': chatgpt_response.content if chatgpt_response.success else ""
+                "gemini_result": (
+                    gemini_response.content if gemini_response.success else ""
+                ),
+                "chatgpt_result": (
+                    chatgpt_response.content if chatgpt_response.success else ""
+                ),
             }
             claude_response = await self.agents[2].query(question, claude_context)
             responses.append(claude_response)
@@ -174,7 +177,11 @@ class Orchestrator:
         for response in responses:
             emoji = "✅" if response.success else "❌"
             parts.append(f"## {emoji} {response.agent_name.title()}\n")
-            parts.append(response.content if response.success else f"*응답 실패: {response.error}*")
+            parts.append(
+                response.content
+                if response.success
+                else f"*응답 실패: {response.error}*"
+            )
             parts.append("\n\n---\n\n")
 
         return "".join(parts)

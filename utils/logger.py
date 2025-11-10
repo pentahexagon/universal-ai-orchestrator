@@ -10,9 +10,7 @@ from typing import Optional
 
 
 def get_logger(
-    name: str,
-    level: str = "INFO",
-    log_file: Optional[str] = "logs/orchestrator.log"
+    name: str, level: str = "INFO", log_file: Optional[str] = "logs/orchestrator.log"
 ) -> logging.Logger:
     """
     구조화된 로거 생성
@@ -35,8 +33,8 @@ def get_logger(
 
     # 포맷터
     formatter = logging.Formatter(
-        fmt='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        fmt="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # 콘솔 핸들러
@@ -50,10 +48,7 @@ def get_logger(
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
         file_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=10 * 1024 * 1024,  # 10MB
-            backupCount=5,
-            encoding='utf-8'
+            log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB
         )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

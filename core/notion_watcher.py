@@ -21,7 +21,7 @@ class NotionWatcher:
         self,
         notion_client: NotionClient,
         polling_interval: int = 30,
-        max_concurrent_tasks: int = 5
+        max_concurrent_tasks: int = 5,
     ):
         """
         Args:
@@ -41,10 +41,7 @@ class NotionWatcher:
 
         self.is_running = False
 
-    async def start(
-        self,
-        callback: Callable[[Question], Awaitable[None]]
-    ):
+    async def start(self, callback: Callable[[Question], Awaitable[None]]):
         """
         감시 시작
 
@@ -62,7 +59,8 @@ class NotionWatcher:
 
                 # 2. 새로운 질문만 필터링
                 new_questions = [
-                    q for q in questions
+                    q
+                    for q in questions
                     if q.page_id not in self.processing_ids
                     and q.page_id not in self.processed_ids
                 ]
@@ -80,7 +78,7 @@ class NotionWatcher:
                     # 4. 병렬 처리
                     await asyncio.gather(
                         *[process_with_semaphore(q) for q in new_questions],
-                        return_exceptions=True
+                        return_exceptions=True,
                     )
 
                 # 5. 다음 폴링까지 대기
@@ -91,9 +89,7 @@ class NotionWatcher:
                 await asyncio.sleep(self.polling_interval)
 
     async def _process_question(
-        self,
-        question: Question,
-        callback: Callable[[Question], Awaitable[None]]
+        self, question: Question, callback: Callable[[Question], Awaitable[None]]
     ):
         """개별 질문 처리"""
         page_id = question.page_id
@@ -104,8 +100,7 @@ class NotionWatcher:
 
             # 상태 업데이트: pending → processing
             await self.notion.update_question_status(
-                page_id=page_id,
-                status=QuestionStatus.PROCESSING
+                page_id=page_id, status=QuestionStatus.PROCESSING
             )
 
             logger.info(f"🔄 처리 시작: {question.text[:50]}...")
@@ -123,8 +118,7 @@ class NotionWatcher:
             # 상태 업데이트: processing → failed
             try:
                 await self.notion.update_question_status(
-                    page_id=page_id,
-                    status=QuestionStatus.FAILED
+                    page_id=page_id, status=QuestionStatus.FAILED
                 )
             except:
                 pass
