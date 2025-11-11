@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "name": "universal-ai-orchestrator",
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/$1.py"
+    }
+  ],
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "GEMINI_API_KEY": "@gemini_api_key",
+    "NOTION_API_KEY": "@notion_api_key",
+    "NOTION_INBOX_DB_ID": "@notion_inbox_db_id",
+    "NOTION_RESULTS_DB_ID": "@notion_results_db_id"
+  }
+}

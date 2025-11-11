@@ -177,9 +177,24 @@ black .
 ruff check .
 ```
 
+## 🌐 배포
+
+### Vercel 배포
+
+이 프로젝트를 Vercel에 배포하려면 다음 비밀 값이 필요합니다:
+
+- `VERCEL_TOKEN` - Vercel Personal Access Token
+- `VERCEL_ORG_ID` - Vercel 조직 ID
+- `VERCEL_PROJECT_ID` - 프로젝트 ID
+
+자세한 배포 방법은 [Vercel 배포 가이드](docs/DEPLOY_VERCEL.md)를 참조하세요.
+
+**참고**: 이 프로젝트는 장기 실행 백그라운드 서비스로, Vercel의 Serverless Functions 제한사항을 고려해야 합니다. Railway, Render, 또는 Docker 기반 배포를 권장합니다.
+
 ## 📚 문서
 
 - [설계 문서](docs/plans/2025-11-09-ai-orchestrator-design.md)
+- [Vercel 배포 가이드](docs/DEPLOY_VERCEL.md)
 
 ## 🛠️ 트러블슈팅
 
