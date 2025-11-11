@@ -14,7 +14,9 @@ Vercel 프로젝트를 배포하려면 다음 세 가지 비밀 값이 필요합
 
 ### GitHub Actions Secrets 설정
 
-GitHub 저장소의 **Settings → Secrets and variables → Actions** 메뉴에서 다음 secrets을 추가하세요:
+GitHub 저장소의 [**Settings → Secrets and variables → Actions**](../../settings/secrets/actions) 메뉴에서 다음 secrets을 추가하세요:
+
+> 💡 **바로가기**: [GitHub Secrets 페이지로 이동](../../settings/secrets/actions)
 
 1. **`VERCEL_TOKEN`** - Vercel Personal Access Token
    - Vercel 대시보드에서 생성: [Settings → Tokens](https://vercel.com/account/tokens)
